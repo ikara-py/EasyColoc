@@ -2,9 +2,31 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
 {
-    //
+    use HasFactory;
+
+    protected $fillable = [
+        'colocation_id', 
+        'name'
+    ];
+
+    
+    public function colocation()
+    {
+        return $this->belongsTo(Colocation::class);
+    }
+
+    public function expenses()
+    {
+        return $this->hasMany(Expense::class);
+    }
+
+    public function isGlobal(): bool
+    {
+        return is_null($this->colocation_id);
+    }
 }
