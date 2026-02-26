@@ -1,59 +1,174 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# EasyColoc
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+EasyColoc is a Laravel-based roommate management web application designed to track shared household expenses and automatically calculate who owes whom. The system eliminates manual calculations and enforces structured financial accountability within shared living environments.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 1. Core Concept & Architecture
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+EasyColoc is built using a strict monolithic MVC architecture with a clear separation of concerns between models, controllers, and views.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Technology Stack
 
-## Learning Laravel
+- Backend: Laravel (Monolithic MVC)
+- Database: MySQL or PostgreSQL
+- ORM: Eloquent
+- Authentication: Laravel Breeze or Jetstream
+- Frontend: Blade Templates and Tailwind CSS
+- Version Control: Git and GitHub
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+The application heavily relies on `belongsToMany` relationships and pivot tables, particularly for managing group-level roles inside colocations.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## 2. Two-Tier Role System
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+A user may only belong to one active colocation at a time. Permissions are determined by a two-tier system.
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Tier A: Platform Roles (Global)
 
-## Contributing
+These roles define permissions across the entire platform.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+#### Admin
+- Automatically assigned to the first registered user.
+- Access to a global statistics dashboard (users, colocations, expenses).
+- Ability to ban or unban users.
+- Banned users are immediately logged out and blocked.
 
-## Code of Conduct
+#### User
+- Default role for all other accounts.
+- Can create a new colocation.
+- Can join an existing colocation via invitation.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Platform roles are stored directly on the `users` table.
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Tier B: Group Roles (Inside a Colocation)
 
-## License
+These roles define permissions inside a specific colocation.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Group roles are stored in the `colocation_user` pivot table.
+
+#### Owner
+- Automatically assigned to the user who creates a colocation.
+- Can invite new users via email or secure token.
+- Can remove members from the group.
+- Can manage expense categories.
+- Can cancel or delete the colocation.
+
+#### Member
+- Joins a colocation via invitation.
+- Can view members, roles, and reputation scores.
+- Can add expenses.
+- Can view balances and debts.
+- Can mark debts as paid.
+- Can voluntarily leave the colocation.
+
+The pivot table stores:
+- `user_id`
+- `colocation_id`
+- `role` (owner or member)
+- timestamps
+
+---
+
+## 3. Core Features & Business Logic
+
+### A. Expense Tracking & Balance Engine
+
+- Any active group member can add an expense.
+- Required fields: title, amount, date, category, payer.
+- The system instantly recalculates balances.
+- A synthetic dashboard displays "who owes what to whom".
+- Expense history can be filtered by month.
+
+#### Settling Debts
+Users register payments using a "Mark as Paid" action.  
+Balances are recalculated automatically.
+
+---
+
+### B. Reputation System
+
+Each user has a financial reputation score based on exit behavior.
+
+- +1 Point: Leaving a colocation with no outstanding debt.
+- -1 Point: Leaving while still owing money.
+
+#### Owner Exception Rule
+If an Owner forcibly removes a Member who still owes money:
+- The debt is transferred to the Owner.
+- The balance engine recalculates immediately.
+
+---
+
+### C. Blocking Logic
+
+- A user already inside an active colocation cannot:
+  - Create another colocation.
+  - Accept an invitation to another colocation.
+
+This rule is strictly enforced at the controller and middleware levels.
+
+---
+
+## 4. Security Implementation
+
+- CSRF protection using `@csrf`
+- XSS protection using Blade escaping `{{ }}`
+- Server-side validation via Form Requests
+- Client-side HTML5 validation
+- Role-based middleware protection
+- Protection against SQL injection through Eloquent ORM
+
+---
+
+## 5. Database Design
+
+Main Entities:
+- Users
+- Colocations
+- Expenses
+- Categories
+- Colocation_User (pivot table with role)
+
+Relationships:
+- Users ↔ Colocations (Many-to-Many with role on pivot)
+- Colocation → Expenses (One-to-Many)
+- Expense → Category (Belongs-To)
+
+The pivot table plays a critical role in enforcing group-level permissions.
+
+---
+
+## 6. Setup Instructions
+
+1. Clone the repository.
+
+2. Install dependencies:
+```
+   composer install  
+   npm install  
+```
+
+3. Configure the `.env` file.
+
+4. Run migrations and seeders:
+```
+   php artisan migrate --seed
+
+```  
+
+5. Start the development server:
+
+```
+   php artisan serve  
+```
+
+---
+
+## Author
+**Ali Kara**
