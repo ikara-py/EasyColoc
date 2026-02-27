@@ -44,4 +44,21 @@ class ExpenseController extends Controller
 
         return back()->with('success', 'Expense moved to history!');
     }
+
+    
+    public function show(Expense $expense)
+    {
+        $colocation = Auth::user()->colocations()->where('colocations.status', 'active')->first();
+
+        if (!$colocation || $expense->colocation_id !== $colocation->id) {
+            return redirect()->route('dashboard')->with('error', 'Access Denied.');
+        }
+
+        $members = $colocation->users;
+        $totalMembers = $members->count();
+
+        $splitAmount = $totalMembers > 0 ? $expense->amount / $totalMembers : $expense->amount;
+
+        return view('expenses.show', compact('expense', 'colocation', 'members', 'splitAmount'));
+    }
 }
