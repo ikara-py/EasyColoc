@@ -41,8 +41,8 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
     Route::get('/users', [AdminController::class, 'users'])->name('users');
-    Route::post('/users/{user}/ban', [AdminController::class, 'banUser'])->name('users.ban');
-    Route::post('/users/{user}/unban', [AdminController::class, 'unbanUser'])->name('users.unban');
+    Route::post('/users/{user}/ban', [AdminController::class, 'ban'])->name('users.ban');
+    Route::post('/users/{user}/unban', [AdminController::class, 'unban'])->name('users.unban');
 });
 
 require __DIR__ . '/auth.php';
