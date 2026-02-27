@@ -114,4 +114,18 @@ class ColocationController extends Controller
 
         return back()->with('success', 'Roommate removed successfully.');
     }
+    
+    public function leave()
+    {
+        $colocation = Auth::user()->colocations->first();
+
+
+        if ($colocation->pivot->group_role === 'owner') {
+            return back()->with('error', 'As the owner, you must delete the house instead of leaving.');
+        }
+
+        $colocation->users()->detach(Auth::id());
+
+        return redirect()->route('dashboard')->with('success', 'You have successfully left the house.');
+    }
 }

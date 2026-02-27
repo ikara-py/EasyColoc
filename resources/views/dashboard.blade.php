@@ -98,6 +98,24 @@
                             </form>
                         </div>
                     @endif
+
+                    @if($colocation->pivot->group_role === 'member')
+                        <div class="border-t border-[#41436A] pt-6 mt-6 flex justify-between items-center">
+                            <div>
+                                <h4 class="text-sm font-black text-[#F64668] uppercase tracking-widest mb-1">Danger Zone</h4>
+                                <p class="text-xs text-gray-400">Leave this house permanently.</p>
+                            </div>
+                            
+                            <form method="POST" action="{{ route('colocations.leave') }}" onsubmit="return confirm('Are you sure you want to leave this house? You will lose access to all expense records.');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" 
+                                    class="px-6 py-3 bg-transparent border-2 border-[#F64668] text-[#F64668] font-black rounded-xl uppercase tracking-widest hover:bg-[#F64668] hover:text-white transition-all whitespace-nowrap">
+                                    Leave House
+                                </button>
+                            </form>
+                        </div>
+                    @endif
                 </div>
             @else
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
