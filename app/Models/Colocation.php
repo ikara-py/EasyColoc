@@ -74,9 +74,19 @@ class Colocation extends Model
 
         $userPaidForExpenses = $this->expenses()->whereNull('date')->where('paid_by', $userId)->sum('amount');
 
-        $userSentSettlements = $this->settlements()->where('payer_id', $userId)->sum('amount');
+        $userSentSettlements = $this->settlements()
+            ->where('payer_id', $userId)
+            ->whereHas('expense', function ($query) {
+                $query->whereNull('date');
+            })
+            ->sum('amount');
 
-        $userReceivedSettlements = $this->settlements()->where('payee_id', $userId)->sum('amount');
+        $userReceivedSettlements = $this->settlements()
+            ->where('payee_id', $userId)
+            ->whereHas('expense', function ($query) {
+                $query->whereNull('date');
+            })
+            ->sum('amount');
 
         $totalGiven = $userPaidForExpenses + $userSentSettlements;
         $totalConsumed = $fairShare + $userReceivedSettlements;

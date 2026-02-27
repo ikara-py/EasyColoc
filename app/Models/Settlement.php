@@ -10,9 +10,10 @@ class Settlement extends Model
     use HasFactory;
 
     protected $fillable = [
-        'colocation_id', 
-        'payer_id', 
-        'payee_id', 
+        'colocation_id',
+        'expense_id',
+        'payer_id',
+        'payee_id',
         'amount'
     ];
     protected function casts(): array
@@ -35,5 +36,10 @@ class Settlement extends Model
     public function payee()
     {
         return $this->belongsTo(User::class, 'payee_id');
+    }
+
+    public function expense()
+    {
+        return $this->belongsTo(Expense::class);
     }
 }
