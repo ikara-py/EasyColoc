@@ -76,4 +76,13 @@ class User extends Authenticatable
     {
         return $this->global_role === 'admin';
     }
+    public function ban()
+    {
+        $this->update(['is_banned' => true]);
+    }
+
+    public function unban()
+    {
+        $this->update(['is_banned' => false]);
+    }
 }

@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ColocationController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -15,6 +17,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/colocations/create', [ColocationController::class, 'create'])->name('colocations.create');
+    Route::post('/colocations', [ColocationController::class, 'store'])->name('colocations.store');
+    
 });
 
-require __DIR__.'/auth.php';
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+    Route::get('/users', [AdminController::class, 'users'])->name('users');
+    Route::post('/users/{user}/ban', [AdminController::class, 'banUser'])->name('users.ban');
+    Route::post('/users/{user}/unban', [AdminController::class, 'unbanUser'])->name('users.unban');
+});
+
+require __DIR__ . '/auth.php';
