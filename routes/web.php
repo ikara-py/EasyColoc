@@ -25,6 +25,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/colocations/generate-invite', [ColocationController::class, 'generateInvite'])->name('colocations.generate_invite');
     Route::delete('/colocations/deactivate', [ColocationController::class, 'deactivate'])->name('colocations.deactivate');
     Route::delete('/colocations/members/{user}', [ColocationController::class, 'removeMember'])->name('colocations.remove_member');
+    Route::delete('/colocations/leave', [ColocationController::class, 'leave'])->name('colocations.leave');
+    
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
