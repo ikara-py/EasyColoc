@@ -20,16 +20,22 @@ class AdminController extends Controller
         ]);
     }
 
+    public function users()
+    {
+        $users = User::latest()->paginate(20);
+        return view('admin.users', compact('users'));
+    }
+
     public function ban(User $user)
     {
-        $user->ban(); 
+        $user->ban();
         
         return back()->with('success', 'User banned.');
     }
 
     public function unban(User $user)
     {
-        $user->unban(); 
+        $user->unban();
         
         return back()->with('success', 'User unbanned.');
     }
