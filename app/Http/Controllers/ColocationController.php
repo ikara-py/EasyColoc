@@ -25,7 +25,6 @@ class ColocationController extends Controller
         DB::transaction(function () use ($validated) {
             $colocation = Colocation::create([
                 'name' => $validated['name'],
-                'join_code' => Str::upper(Str::random(8)),
                 'status' => 'active',
             ]);
 
@@ -53,14 +52,14 @@ class ColocationController extends Controller
 
         DB::transaction(function () use ($colocation, $invitation) {
             $colocation->users()->attach(Auth::id(), ['group_role' => 'member']);
-            
+
             $invitation->accept();
         });
 
         return redirect()->route('dashboard')->with('success', "You have successfully joined {$colocation->name}!");
     }
 
-    
+
     public function generateInvite(Request $request)
     {
         /** @var \App\Models\User $user */
@@ -114,7 +113,7 @@ class ColocationController extends Controller
 
         return back()->with('success', 'Roommate removed successfully.');
     }
-    
+
     public function leave()
     {
         $colocation = Auth::user()->colocations->first();
