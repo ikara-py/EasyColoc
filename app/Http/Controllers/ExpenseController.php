@@ -27,9 +27,38 @@ class ExpenseController extends Controller
             'category_id' => $request->category_id,
             'title' => $request->title,
             'amount' => $request->amount,
-            'date' => $request->date,
         ]);
 
         return redirect()->route('dashboard')->with('success', 'Expense logged successfully!');
+    }
+
+    public function settle(Expense $expense)
+    {
+        $colocation = Auth::user()->colocations()->where('colocations.status', 'active')->first();
+
+        if (!$colocation || $expense->colocation_id !== $colocation->id) {
+            return back()->with('error', 'You do not have permission to settle this expense.');
+        }
+
+        $expense->update(['date' => now()]);
+
+        return back()->with('success', 'Expense moved to history!');
+    }
+
+    
+    public function show(Expense $expense)
+    {
+        $colocation = Auth::user()->colocations()->where('colocations.status', 'active')->first();
+
+        if (!$colocation || $expense->colocation_id !== $colocation->id) {
+            return redirect()->route('dashboard')->with('error', 'Access Denied.');
+        }
+
+        $members = $colocation->users;
+        $totalMembers = $members->count();
+
+        $splitAmount = $totalMembers > 0 ? $expense->amount / $totalMembers : $expense->amount;
+
+        return view('expenses.show', compact('expense', 'colocation', 'members', 'splitAmount'));
     }
 }
