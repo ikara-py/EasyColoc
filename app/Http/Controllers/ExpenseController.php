@@ -37,7 +37,11 @@ class ExpenseController extends Controller
         $colocation = Auth::user()->colocations()->where('colocations.status', 'active')->first();
 
         if (!$colocation || $expense->colocation_id !== $colocation->id) {
-            return back()->with('error', 'You do not have permission to settle this expense.');
+            return back()->with('error', 'Access Denied.');
+        }
+
+        if (Auth::id() !== $expense->paid_by) {
+            return back()->with('error', 'Only the person who paid this expense can mark it as settled.');
         }
 
         $expense->update(['date' => now()]);

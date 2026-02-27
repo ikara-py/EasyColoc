@@ -60,4 +60,27 @@ class Colocation extends Model
     {
         return $this->status === 'active';
     }
+
+    public function getUserBalance($userId)
+    {
+        $totalMembers = $this->users()->count();
+
+        if ($totalMembers === 0) {
+            return 0;
+        }
+
+        $totalHouseExpenses = $this->expenses()->whereNull('date')->sum('amount');
+        $fairShare = $totalHouseExpenses / $totalMembers;
+
+        $userPaidForExpenses = $this->expenses()->whereNull('date')->where('paid_by', $userId)->sum('amount');
+
+        $userSentSettlements = $this->settlements()->where('payer_id', $userId)->sum('amount');
+
+        $userReceivedSettlements = $this->settlements()->where('payee_id', $userId)->sum('amount');
+
+        $totalGiven = $userPaidForExpenses + $userSentSettlements;
+        $totalConsumed = $fairShare + $userReceivedSettlements;
+
+        return $totalGiven - $totalConsumed;
+    }
 }
