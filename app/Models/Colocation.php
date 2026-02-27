@@ -9,7 +9,7 @@ class Colocation extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'status', 'join_code'];
+    protected $fillable = ['name', 'status'];
 
     public function users()
     {
