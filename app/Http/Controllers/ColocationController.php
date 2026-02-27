@@ -75,7 +75,7 @@ class ColocationController extends Controller
             return redirect()->route('dashboard')->with('error', 'Access Denied: Only the house owner can generate invites.');
         }
 
-        $token = strtoupper(\Illuminate\Support\Str::random(8));
+        $token = strtoupper(Str::random(8));
 
         $colocation->invitations()->create([
             'token' => $token,
@@ -100,5 +100,18 @@ class ColocationController extends Controller
         $colocation->update(['status' => 'inactive']);
 
         return redirect()->route('dashboard')->with('success', 'House deleted successfully.');
+    }
+
+    public function removeMember($userId)
+    {
+        $colocation = Auth::user()->colocations->first();
+
+        if (!$colocation || $colocation->pivot->group_role !== 'owner') {
+            return back()->with('error', 'Only the house owner can remove members.');
+        }
+
+        $colocation->users()->detach($userId);
+
+        return back()->with('success', 'Roommate removed successfully.');
     }
 }
