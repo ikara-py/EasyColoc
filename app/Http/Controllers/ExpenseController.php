@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreExpenseRequest;
 use App\Models\Expense;
+use App\Models\Settlement;
 
 class ExpenseController extends Controller
 {
@@ -84,6 +85,10 @@ class ExpenseController extends Controller
 
         $splitAmount = $totalMembers > 0 ? $expense->amount / $totalMembers : $expense->amount;
 
-        return view('expenses.show', compact('expense', 'colocation', 'members', 'splitAmount'));
+        $settledUserIds = Settlement::where('expense_id', $expense->id)
+            ->pluck('payer_id')
+            ->toArray();
+
+        return view('expenses.show', compact('expense', 'colocation', 'members', 'splitAmount', 'settledUserIds'));
     }
 }
