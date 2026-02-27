@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ColocationController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\SettlementController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -30,6 +31,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/expenses/create', [ExpenseController::class, 'create'])->name('expenses.create');
     Route::post('/expenses', [ExpenseController::class, 'store'])->name('expenses.store');
     Route::patch('/expenses/{expense}/settle', [ExpenseController::class, 'settle'])->name('expenses.settle');
+    Route::get('/expenses/{expense}', [ExpenseController::class, 'show'])->name('expenses.show');
+    Route::post('/expenses/{expense}/mark-paid/{user}', [SettlementController::class, 'store'])->name('expenses.mark_paid');
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
