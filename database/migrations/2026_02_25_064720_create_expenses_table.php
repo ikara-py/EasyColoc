@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('paid_by')->constrained('users');
             $table->string('title');
             $table->decimal('amount', 10, 2);
-            $table->date('date');
+            $table->date('date')->nullable();;
             $table->timestamps();
         });
     }

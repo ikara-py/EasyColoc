@@ -29,6 +29,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/colocations/leave', [ColocationController::class, 'leave'])->name('colocations.leave');
     Route::get('/expenses/create', [ExpenseController::class, 'create'])->name('expenses.create');
     Route::post('/expenses', [ExpenseController::class, 'store'])->name('expenses.store');
+    Route::patch('/expenses/{expense}/settle', [ExpenseController::class, 'settle'])->name('expenses.settle');
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
