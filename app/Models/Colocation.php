@@ -9,23 +9,23 @@ class Colocation extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'status'];
+    protected $fillable = ['name', 'status', 'join_code'];
 
-    public function members()
+    public function users()
     {
         return $this->belongsToMany(User::class)
-                    ->using(ColocationUser::class)
-                    ->withPivot('group_role', 'left_at')
-                    ->withTimestamps();
+            ->using(ColocationUser::class)
+            ->withPivot('group_role', 'left_at')
+            ->withTimestamps();
     }
 
     public function activeMembers()
     {
         return $this->belongsToMany(User::class)
-                    ->using(ColocationUser::class)
-                    ->withPivot('group_role', 'left_at')
-                    ->wherePivotNull('left_at')
-                    ->withTimestamps();
+            ->using(ColocationUser::class)
+            ->withPivot('group_role', 'left_at')
+            ->wherePivotNull('left_at')
+            ->withTimestamps();
     }
 
     public function invitations()
@@ -50,10 +50,10 @@ class Colocation extends Model
 
     public function getOwner()
     {
-        return $this->members()
-                    ->wherePivot('group_role', 'owner')
-                    ->wherePivotNull('left_at')
-                    ->first();
+        return $this->users()
+            ->wherePivot('group_role', 'owner')
+            ->wherePivotNull('left_at')
+            ->first();
     }
 
     public function isActive(): bool

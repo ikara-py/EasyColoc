@@ -23,7 +23,6 @@ class ColocationController extends Controller
         DB::transaction(function () use ($validated) {
             $colocation = Colocation::create([
                 'name' => $validated['name'],
-                'currency' => strtoupper($validated['currency']),
                 'join_code' => Str::upper(Str::random(8)),
                 'status' => 'active',
             ]);

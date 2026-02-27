@@ -17,7 +17,6 @@ class StoreColocationRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:100',
-            'currency' => 'required|string|size:3',
         ];
     }
 }
