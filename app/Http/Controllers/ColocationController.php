@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Colocation;
-use App\Models\Invitation; // <-- Important: Include your model
+use App\Models\Invitation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
@@ -97,7 +97,7 @@ class ColocationController extends Controller
             return redirect()->route('dashboard')->with('error', 'You must remove all roommates before deleting the house.');
         }
 
-        $colocation->update(['status' => 'inactive']);
+        $colocation->update(['status' => 'cancelled']);
 
         return redirect()->route('dashboard')->with('success', 'House deleted successfully.');
     }
