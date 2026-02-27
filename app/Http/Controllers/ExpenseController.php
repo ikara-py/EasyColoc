@@ -9,9 +9,30 @@ use App\Models\Expense;
 
 class ExpenseController extends Controller
 {
+    public function index()
+    {
+        $colocation = Auth::user()->colocations()->where('colocations.status', 'active')->first();
+
+        if (!$colocation) {
+            return redirect()->route('dashboard')->with('error', 'You must be in an active house to view expenses.');
+        }
+
+        $settledExpenses = $colocation->expenses()->whereNotNull('date')->with('paidBy')->orderBy('date', 'desc')->get();
+
+        return view('expenses.index', compact('colocation', 'settledExpenses'));
+    }
+
     public function create()
     {
-        return view('expenses.create');
+        $colocation = Auth::user()->colocations()->where('colocations.status', 'active')->first();
+
+        if (!$colocation) {
+            return redirect()->route('dashboard')->with('error', 'You must be in an active house to log expenses.');
+        }
+
+        $categories = $colocation->categories;
+
+        return view('expenses.create', compact('categories'));
     }
 
     public function store(StoreExpenseRequest $request)
@@ -49,7 +70,7 @@ class ExpenseController extends Controller
         return back()->with('success', 'Expense moved to history!');
     }
 
-    
+
     public function show(Expense $expense)
     {
         $colocation = Auth::user()->colocations()->where('colocations.status', 'active')->first();

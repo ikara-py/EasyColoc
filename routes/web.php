@@ -6,6 +6,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ColocationController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\SettlementController;
+use App\Http\Controllers\CategoryController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -33,6 +34,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('/expenses/{expense}/settle', [ExpenseController::class, 'settle'])->name('expenses.settle');
     Route::get('/expenses/{expense}', [ExpenseController::class, 'show'])->name('expenses.show');
     Route::post('/expenses/{expense}/mark-paid/{user}', [SettlementController::class, 'store'])->name('expenses.mark_paid');
+    Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
+    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
