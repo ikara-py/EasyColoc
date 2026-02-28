@@ -40,6 +40,8 @@ class SettlementController extends Controller
             'payee_id' => Auth::id(),
             'amount' => $splitAmount
         ]);
+        
+        $user->increment('reputation_score');
 
         $settlementsCount = Settlement::where('expense_id', $expense->id)->count();
         $expectedSettlements = $totalMembers - 1;
