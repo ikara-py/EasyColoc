@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\StoreColocationRequest;
 use App\Http\Requests\JoinColocationRequest;
+use \App\Models\User;
 
 class ColocationController extends Controller
 {
@@ -109,7 +110,12 @@ class ColocationController extends Controller
             return back()->with('error', 'Only the house owner can remove members.');
         }
 
-        $colocation->users()->detach($userId);
+        $balance = $colocation->getUserBalance($userId);
+        if ($balance < 0) {
+            User::where('id', $userId)->decrement('reputation_score');
+        }
+
+        $colocation->users()->updateExistingPivot($userId, ['left_at' => now()]);
 
         return back()->with('success', 'Roommate removed successfully.');
     }
@@ -118,12 +124,18 @@ class ColocationController extends Controller
     {
         $colocation = Auth::user()->colocations->first();
 
-
         if ($colocation->pivot->group_role === 'owner') {
             return back()->with('error', 'As the owner, you must delete the house instead of leaving.');
         }
 
-        $colocation->users()->detach(Auth::id());
+        $userId = Auth::id();
+        $balance = $colocation->getUserBalance($userId);
+
+        if ($balance < 0) {
+            Auth::user()->decrement('reputation_score');
+        }
+
+        $colocation->users()->updateExistingPivot($userId, ['left_at' => now()]);
 
         return redirect()->route('dashboard')->with('success', 'You have successfully left the house.');
     }
