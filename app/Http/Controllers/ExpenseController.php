@@ -66,6 +66,16 @@ class ExpenseController extends Controller
             return back()->with('error', 'Only the person who paid this expense can mark it as settled.');
         }
 
+        $settledUserIds = Settlement::where('expense_id', $expense->id)
+            ->pluck('payer_id')
+            ->toArray();
+
+        foreach ($colocation->users as $member) {
+            if ($member->id !== $expense->paid_by && !in_array($member->id, $settledUserIds)) {
+                $member->decrement('reputation_score');
+            }
+        }
+
         $expense->update(['date' => now()]);
 
         return back()->with('success', 'Expense moved to history!');
