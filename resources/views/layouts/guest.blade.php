@@ -18,8 +18,11 @@
 <body class="font-sans text-white antialiased">
     <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-[#1a1c29]">
         <div>
-            <a href="/">
-                <x-application-logo class="w-20 h-20 fill-current text-[#FE9677]" />
+            <a href="/" class="flex flex-col items-center gap-4 hover:scale-105 transition-transform drop-shadow-[0_0_15px_rgba(246,70,104,0.3)]">
+                <img src="{{ asset('assets/logo.svg') }}" class="w-20 h-20 object-contain drop-shadow-[0_0_8px_rgba(254,150,119,0.5)]" alt="EasyColoc Logo" />
+                <span class="text-4xl font-black tracking-widest uppercase bg-gradient-to-r from-[#FE9677] to-[#F64668] bg-clip-text text-transparent">
+                    EasyColoc
+                </span>
             </a>
         </div>
 
