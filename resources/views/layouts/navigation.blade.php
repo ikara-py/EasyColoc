@@ -4,9 +4,12 @@
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-[#FE9677]" />
+                <div class="shrink-0 flex items-center mt-1">
+                    <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
+                        <img src="{{ asset('assets/logo.svg') }}" class="w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(254,150,119,0.5)]" alt="EasyColoc Logo" />
+                        <span class="text-xl font-black tracking-widest uppercase bg-gradient-to-r from-[#FE9677] to-[#F64668] bg-clip-text text-transparent hidden sm:block">
+                            EasyColoc
+                        </span>
                     </a>
                 </div>
 
