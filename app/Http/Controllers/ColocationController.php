@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\StoreColocationRequest;
 use App\Http\Requests\JoinColocationRequest;
-use \App\Models\User;
+use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 
 class ColocationController extends Controller
 {
@@ -37,7 +38,7 @@ class ColocationController extends Controller
 
     public function join(JoinColocationRequest $request)
     {
-        $token = $request->validated()['join_code'];
+        $token = trim($request->validated()['join_code']);
 
         $invitation = Invitation::where('token', $token)->first();
 
@@ -61,28 +62,56 @@ class ColocationController extends Controller
     }
 
 
-    public function generateInvite(Request $request)
+    public function sendInvite(Request $request)
     {
+        $request->validate([
+            'email' => 'required|email'
+        ]);
+
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        $colocation = $user->colocations()->first();
+        $colocation = $user->colocations()->wherePivotNull('left_at')->first();
 
         if (!$colocation) {
             return redirect()->route('dashboard')->with('error', 'You must be in a house to invite someone.');
         }
 
         if ($colocation->pivot->group_role !== 'owner') {
-            return redirect()->route('dashboard')->with('error', 'Access Denied: Only the house owner can generate invites.');
+            return redirect()->route('dashboard')->with('error', 'Access Denied: Only the house owner can send invites.');
         }
 
-        $token = strtoupper(Str::random(8));
-
-        $colocation->invitations()->create([
+        $token = strtoupper(Str::random(10));
+        $invitation = $colocation->invitations()->create([
+            'email' => $request->email,
             'token' => $token,
             'status' => 'pending',
         ]);
 
-        return redirect()->route('dashboard')->with('success', "New Invite Code Generated: {$token}. Share this with your roommate!");
+        Mail::to($request->email)->send(new \App\Mail\InvitationMail($invitation));
+
+        return redirect()->route('dashboard')->with('success', "An invitation has been sent to {$request->email}!");
+    }
+
+    public function acceptInvite($token)
+    {
+        $invitation = Invitation::where('token', $token)->firstOrFail();
+
+        if (!$invitation->isPending()) {
+            return redirect()->route('dashboard')->with('error', 'This invitation link has already been used or has expired.');
+        }
+
+        $colocation = $invitation->colocation;
+
+        if ($colocation->users()->where('user_id', Auth::id())->exists()) {
+            return redirect()->route('dashboard')->with('error', 'You are already a member of this house.');
+        }
+
+        DB::transaction(function () use ($colocation, $invitation) {
+            $colocation->users()->attach(Auth::id(), ['group_role' => 'member']);
+            $invitation->accept();
+        });
+
+        return redirect()->route('dashboard')->with('success', "You have successfully joined {$colocation->name}!");
     }
 
     public function deactivate()

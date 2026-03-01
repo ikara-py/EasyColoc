@@ -152,17 +152,20 @@
                 </div>
 
                 @if($colocation->pivot->group_role === 'owner')
-                <div class="border-t border-[#41436A] pt-6 mt-2 flex justify-between items-center">
-                    <div>
-                        <h4 class="text-sm font-black text-[#FE9677] uppercase tracking-widest mb-1">Invite a Roommate</h4>
-                        <p class="text-xs text-gray-400">Generate a unique, single-use join code.</p>
+                <div class="border-t border-[#41436A] pt-6 mt-6 flex justify-between items-center">
+                    <div class="w-1/2">
+                        <h4 class="text-sm font-black text-[#FE9677] uppercase tracking-widest mb-1">Invite a Roommate via Email</h4>
+                        <p class="text-xs text-gray-400">Send an email invitation directly to your roommate.</p>
                     </div>
 
-                    <form method="POST" action="{{ route('colocations.generate_invite') }}">
+                    <form method="POST" action="{{ route('colocations.send_invite') }}" class="flex gap-4 items-center w-1/2 justify-end">
                         @csrf
+                        <input type="email" name="email" required placeholder="ROOMMATE@EMAIL.COM"
+                            class="w-full max-w-xs bg-[#0f1015] border-2 border-[#41436A] rounded-xl px-4 py-3 text-white text-sm font-bold placeholder-gray-600 focus:border-[#FE9677] focus:ring-0 transition-all">
+
                         <button type="submit"
                             class="px-6 py-3 bg-[#26283b] border-2 border-[#FE9677] text-[#FE9677] font-black rounded-xl uppercase tracking-widest hover:bg-[#FE9677] hover:text-[#1e2030] transition-all whitespace-nowrap">
-                            Generate Code
+                            Send Invite
                         </button>
                     </form>
                 </div>
@@ -218,7 +221,7 @@
                     <p class="text-gray-400 mb-8">Have a unique invite code from your roommate?</p>
                     <form method="POST" action="{{ route('colocations.join') }}" class="flex flex-col items-center">
                         @csrf
-                        <input type="text" name="join_code" required placeholder="8-CHAR CODE" maxlength="8"
+                        <input type="text" name="join_code" required placeholder="10-CHAR CODE" maxlength="10"
                             class="w-full max-w-xs bg-[#0f1015] border-2 border-[#41436A] rounded-xl px-4 py-3 text-center text-white font-black tracking-widest uppercase focus:border-[#FE9677] focus:ring-0 transition-all mb-4">
                         @error('join_code')
                         <span class="text-[#F64668] text-xs font-bold mb-4 block">{{ $message }}</span>

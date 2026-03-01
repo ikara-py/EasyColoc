@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('payer_id')->constrained('users');
             $table->foreignId('payee_id')->constrained('users');
             $table->decimal('amount', 10, 2);
+            $table->foreignId('expense_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }
