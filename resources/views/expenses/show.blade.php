@@ -62,13 +62,27 @@
 
                     @if(is_null($expense->date))
                     @if(Auth::id() === $expense->paid_by)
-                    <form method="POST" action="{{ route('expenses.settle', $expense->id) }}">
-                        @csrf
-                        @method('PATCH')
-                        <button type="submit" class="px-6 py-3 bg-green-500/20 border-2 border-green-500 text-green-400 hover:bg-green-500 hover:text-white font-black rounded-xl uppercase tracking-widest transition-all">
-                            Mark as Settled
-                        </button>
-                    </form>
+                    <div class="flex gap-4 items-center">
+                        <a href="{{ route('expenses.edit', $expense->id) }}" class="px-6 py-3 bg-[#0f1015] border-2 border-[#41436A] text-gray-400 hover:bg-[#41436A] hover:text-white font-black rounded-xl uppercase tracking-widest transition-all">
+                            Edit
+                        </a>
+
+                        <form method="POST" action="{{ route('expenses.destroy', $expense->id) }}" class="form-confirm" data-message="Are you sure you want to delete this expense? All settlements related to it will be permanently deleted.">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="px-6 py-3 bg-transparent border-2 border-[#F64668] text-[#F64668] hover:bg-[#F64668] hover:text-white font-black rounded-xl uppercase tracking-widest transition-all">
+                                Delete
+                            </button>
+                        </form>
+
+                        <form method="POST" action="{{ route('expenses.settle', $expense->id) }}">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit" class="px-6 py-3 bg-green-500/20 border-2 border-green-500 text-green-400 hover:bg-green-500 hover:text-white font-black rounded-xl uppercase tracking-widest transition-all">
+                                Mark as Settled
+                            </button>
+                        </form>
+                    </div>
                     @else
                     <span class="px-6 py-3 bg-gray-500/10 border-2 border-gray-500/50 text-gray-500 font-black rounded-xl uppercase tracking-widest">
                         Pending

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreExpenseRequest;
+use App\Http\Requests\UpdateExpenseRequest;
 use App\Models\Expense;
 use App\Models\Settlement;
 
@@ -52,6 +53,72 @@ class ExpenseController extends Controller
         ]);
 
         return redirect()->route('dashboard')->with('success', 'Expense logged successfully!');
+    }
+
+    public function edit(Expense $expense)
+    {
+        $colocation = Auth::user()->colocations()->where('colocations.status', 'active')->first();
+
+        if (!$colocation || $expense->colocation_id !== $colocation->id) {
+            return redirect()->route('dashboard')->with('error', 'Access Denied.');
+        }
+
+        if (Auth::id() !== $expense->paid_by) {
+            return back()->with('error', 'Only the person who paid this expense can edit it.');
+        }
+
+        if (!is_null($expense->date)) {
+            return back()->with('error', 'You cannot edit an expense that has already been fully settled.');
+        }
+
+        $categories = $colocation->categories;
+        return view('expenses.edit', compact('expense', 'categories'));
+    }
+
+    public function update(UpdateExpenseRequest $request, Expense $expense)
+    {
+        $colocation = Auth::user()->colocations()->where('colocations.status', 'active')->first();
+
+        if (!$colocation || $expense->colocation_id !== $colocation->id) {
+            return redirect()->route('dashboard')->with('error', 'Access Denied.');
+        }
+
+        if (Auth::id() !== $expense->paid_by) {
+            return back()->with('error', 'Only the person who paid this expense can edit it.');
+        }
+
+        if (!is_null($expense->date)) {
+            return back()->with('error', 'You cannot edit an expense that has already been fully settled.');
+        }
+
+        $expense->update([
+            'title' => $request->title,
+            'amount' => $request->amount,
+            'category_id' => $request->category_id,
+        ]);
+
+        return redirect()->route('expenses.show', $expense->id)->with('success', 'Expense updated successfully!');
+    }
+
+    public function destroy(Expense $expense)
+    {
+        $colocation = Auth::user()->colocations()->where('colocations.status', 'active')->first();
+
+        if (!$colocation || $expense->colocation_id !== $colocation->id) {
+            return redirect()->route('dashboard')->with('error', 'Access Denied.');
+        }
+
+        if (Auth::id() !== $expense->paid_by) {
+            return back()->with('error', 'Only the person who paid this expense can delete it.');
+        }
+
+        if (!is_null($expense->date)) {
+            return back()->with('error', 'You cannot delete an expense that has already been fully settled.');
+        }
+
+        $expense->delete();
+
+        return redirect()->route('dashboard')->with('success', 'Expense deleted successfully!');
     }
 
     public function settle(Expense $expense)
