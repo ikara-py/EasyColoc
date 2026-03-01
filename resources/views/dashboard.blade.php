@@ -20,10 +20,6 @@
             </div>
             @endif
 
-            @php
-            $colocation = Auth::user()->colocations()->where('colocations.status', 'active')->first();
-            @endphp
-
             @if($colocation)
             <div class="bg-[#1e2030] border-2 border-[#984063] rounded-[22px] p-8 text-white">
                 <div class="flex justify-between items-center mb-6">
@@ -41,11 +37,7 @@
                         </a>
                     </div>
 
-                    @php
-                    $activeExpenses = $colocation->expenses()->whereNull('date')->with('paidBy')->orderBy('created_at', 'desc')->get();
 
-                    $settledExpenses = $colocation->expenses()->whereNotNull('date')->with('paidBy')->orderBy('date', 'desc')->get();
-                    @endphp
 
                     @if($activeExpenses->isEmpty())
                     <div class="bg-[#0f1015] border border-[#41436A] rounded-xl p-8 text-center mb-6">
@@ -96,14 +88,12 @@
                     <h4 class="text-sm font-black text-[#FE9677] uppercase tracking-widest mb-4">House Members</h4>
                     <div class="space-y-3">
                         @foreach($colocation->users as $member)
-                        <div class="flex justify-between items-center bg-[#0f1015] p-4 rounded-xl border {{ $member->pivot->left_at ? 'border-gray-700 opacity-60' : 'border-[#41436A]' }}">
+                        @if(!$member->pivot->left_at)
+                        <div class="flex justify-between items-center bg-[#0f1015] p-4 rounded-xl border border-[#41436A]">
                             <div>
                                 <div class="flex items-center gap-2">
                                     <p class="text-white font-bold">
                                         {{ $member->name }}
-                                        @if($member->pivot->left_at)
-                                        <span class="text-xs text-gray-500 italic ml-2">(Left)</span>
-                                        @endif
                                     </p>
                                     @php
                                     $repColor = $member->reputation_score > 0 ? 'text-green-400' : ($member->reputation_score < 0 ? 'text-[#F64668]' : 'text-gray-400' );
@@ -135,7 +125,7 @@
                                         {{ $member->pivot->group_role }}
                                     </span>
 
-                                    @if($colocation->pivot->group_role === 'owner' && $member->id !== Auth::id() && !$member->pivot->left_at)
+                                    @if($colocation->pivot->group_role === 'owner' && $member->id !== Auth::id())
                                     <form method="POST" action="{{ route('colocations.remove_member', $member->id) }}" class="form-confirm" data-message="Are you sure you want to kick {{ $member->name }}?">
                                         @csrf
                                         @method('DELETE')
@@ -147,6 +137,7 @@
                                 </div>
                             </div>
                         </div>
+                        @endif
                         @endforeach
                     </div>
                 </div>
