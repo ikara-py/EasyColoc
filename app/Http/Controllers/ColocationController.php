@@ -48,12 +48,18 @@ class ColocationController extends Controller
 
         $colocation = $invitation->colocation;
 
-        if ($colocation->users()->where('user_id', Auth::id())->exists()) {
+        $existingMember = $colocation->users()->where('user_id', Auth::id())->first();
+
+        if ($existingMember && is_null($existingMember->pivot->left_at)) {
             return redirect()->route('dashboard')->with('error', 'You are already a member of this house.');
         }
 
-        DB::transaction(function () use ($colocation, $invitation) {
-            $colocation->users()->attach(Auth::id(), ['group_role' => 'member']);
+        DB::transaction(function () use ($colocation, $invitation, $existingMember) {
+            if ($existingMember) {
+                $colocation->users()->updateExistingPivot(Auth::id(), ['left_at' => null, 'group_role' => 'member']);
+            } else {
+                $colocation->users()->attach(Auth::id(), ['group_role' => 'member']);
+            }
 
             $invitation->accept();
         });
@@ -102,12 +108,18 @@ class ColocationController extends Controller
 
         $colocation = $invitation->colocation;
 
-        if ($colocation->users()->where('user_id', Auth::id())->exists()) {
+        $existingMember = $colocation->users()->where('user_id', Auth::id())->first();
+
+        if ($existingMember && is_null($existingMember->pivot->left_at)) {
             return redirect()->route('dashboard')->with('error', 'You are already a member of this house.');
         }
 
-        DB::transaction(function () use ($colocation, $invitation) {
-            $colocation->users()->attach(Auth::id(), ['group_role' => 'member']);
+        DB::transaction(function () use ($colocation, $invitation, $existingMember) {
+            if ($existingMember) {
+                $colocation->users()->updateExistingPivot(Auth::id(), ['left_at' => null, 'group_role' => 'member']);
+            } else {
+                $colocation->users()->attach(Auth::id(), ['group_role' => 'member']);
+            }
             $invitation->accept();
         });
 
