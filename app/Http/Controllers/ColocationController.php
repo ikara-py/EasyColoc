@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\StoreColocationRequest;
 use App\Http\Requests\JoinColocationRequest;
+use App\Http\Requests\SendInviteRequest;
+use App\Mail\InvitationMail;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 
@@ -68,11 +70,8 @@ class ColocationController extends Controller
     }
 
 
-    public function sendInvite(Request $request)
+    public function sendInvite(SendInviteRequest $request)
     {
-        $request->validate([
-            'email' => 'required|email'
-        ]);
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
@@ -93,7 +92,7 @@ class ColocationController extends Controller
             'status' => 'pending',
         ]);
 
-        Mail::to($request->email)->send(new \App\Mail\InvitationMail($invitation));
+        Mail::to($request->email)->send(new InvitationMail($invitation));
 
         return redirect()->route('dashboard')->with('success', "An invitation has been sent to {$request->email}!");
     }
